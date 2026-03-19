@@ -14,7 +14,7 @@ const clerkWebhooks = async (req, res) => {
     
         await whook.verify(JSON.stringify(req.body),{
             "svix-id": req.headers["svix-id"],
-            "svix-timestamp": req.headers["svix=timestamp"],
+            "svix-timestamp": req.headers["svix-timestamp"],
             "svix-signature":req.headers["svix-signature"]
         })
 
@@ -30,7 +30,7 @@ const clerkWebhooks = async (req, res) => {
                     lastName: data.last_name,
                     photo: data.image_url
                 }
-
+              
                 await userModel.create(userData)
                 res.json({})
 
@@ -68,4 +68,6 @@ const clerkWebhooks = async (req, res) => {
     }
 }
 
-export {clerkWebhooks}
+
+
+export { clerkWebhooks };
