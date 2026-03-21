@@ -3,22 +3,24 @@ import userModel from "../models/userModel.js"
 import razorpay from 'razorpay'
 import transactionModel from "../models/transactionModel.js"
 
-// API Controller functiom to manage clerk user iwth database
+// API Controller functiom to manage clerk user with database
 // http://localhost:4000/api/user/webhooks
 
 const clerkWebhooks = async (req, res) => {
     console.log("WEBHOOK HIT");
+    console.log("TYPE:", type);
+    
     try{
 
         //create a svix instance with clerk webhook secret
-        const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
+        // const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
     
     
-        await whook.verify(JSON.stringify(req.body),{
-            "svix-id": req.headers["svix-id"],
-            "svix-timestamp": req.headers["svix-timestamp"],
-            "svix-signature":req.headers["svix-signature"]
-        })
+        // await whook.verify(JSON.stringify(req.body),{
+        //     "svix-id": req.headers["svix-id"],
+        //     "svix-timestamp": req.headers["svix-timestamp"],
+        //     "svix-signature":req.headers["svix-signature"]
+        // })
 
         const {data, type} = req.body
 
@@ -35,6 +37,8 @@ const clerkWebhooks = async (req, res) => {
               
                 await userModel.create(userData)
                 res.json({})
+
+                console.log("TYPE:", type);
 
                 break;
             }
@@ -53,6 +57,7 @@ const clerkWebhooks = async (req, res) => {
                 
                 break;
             }
+
             case "user.deleted":{
 
                 await userModel.findOneAndDelete({clerkId:data.id})
@@ -77,7 +82,7 @@ const userCredits = async(req, res) =>{
     try {
         const clerkId = req.clerkId
         
-        const userData = await userModel.findOne({clerkId})
+        const userData = await userModel.findOne({ clerkId })
 
         res.json({success:true, credits: userData.creditBalance})
 
