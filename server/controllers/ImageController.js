@@ -36,9 +36,9 @@ const removeBgImage = async (req,res) => {
             responseType: 'arraybuffer'
         })
 
-        const base64Image = Buffer.f(data, 'binary').toString('base64')
+        const base64Image = Buffer.from(data, 'binary').toString('base64')
 
-        const resultImage = `data:${req.file.mimetype};base64Image,${base64Image}`
+        const resultImage = `data:${req.file.mimetype};base64,${base64Image}`
 
         await userModel.findByIdAndUpdate(user._id,{creditBalance: user.creditBalance - 1})
 
