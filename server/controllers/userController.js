@@ -8,7 +8,6 @@ import transactionModel from "../models/transactionModel.js"
 
 const clerkWebhooks = async (req, res) => {
     console.log("WEBHOOK HIT");
-    console.log("TYPE:", type);
     
     try{
 
@@ -23,6 +22,8 @@ const clerkWebhooks = async (req, res) => {
         // })
 
         const {data, type} = req.body
+
+        console.log("TYPE:", type);
 
         switch (type) {
             case "user.created":{
