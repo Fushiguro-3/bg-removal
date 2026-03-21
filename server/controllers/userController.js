@@ -7,7 +7,7 @@ import transactionModel from "../models/transactionModel.js"
 // http://localhost:4000/api/user/webhooks
 
 const clerkWebhooks = async (req, res) => {
-
+    console.log("WEBHOOK HIT");
     try{
 
         //create a svix instance with clerk webhook secret
