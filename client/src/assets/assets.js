@@ -16,9 +16,15 @@ import profile_img_2 from './profile_img_2.png'
 import credit_icon from './credit_icon.png'
 import logo1 from './logo.png'
 import x from './x.svg'
+import xnew from './xnew.png'
+import Symbol from './Symbol.png'
+import linkedin from './linkedin.png'
 
 export const assets = {
     logo,
+    xnew,
+    Symbol,
+    linkedin,
     logo1,
     x,
     logo_icon,
