@@ -11,41 +11,33 @@ const clerkWebhooks = async (req, res) => {
     try {
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
 
-        // ✅ Vercel-compatible way - req.body is already available
-        const payload = JSON.stringify(req.body)
-
-        await whook.verify(payload, {
+        // ✅ req.body is now the raw buffer directly
+        await whook.verify(req.body, {
             "svix-id": req.headers["svix-id"],
             "svix-timestamp": req.headers["svix-timestamp"],
             "svix-signature": req.headers["svix-signature"]
         })
 
-        const { data, type } = req.body
+        // ✅ parse it after verification
+        const { data, type } = JSON.parse(req.body.toString())
 
-        console.log("TYPE:", type);
+        console.log("TYPE:", type)
 
         switch (type) {
             case "user.created": {
-    console.log("USER CREATED HIT")  // ✅ add
-    console.log("DATA:", data)        // ✅ add
-    
-    const userData = {
-        clerkId: data.id,
-        email: data.email_addresses[0].email_address,
-        firstName: data.first_name,
-        lastName: data.last_name,
-        photo: data.image_url
-    }
-    
-    console.log("USERDATA:", userData)  // ✅ add
-    
-    const result = await userModel.create(userData)
-    
-    console.log("SAVED:", result)  // ✅ add
-    
-    res.json({ success: true })
-    break;
-}
+                const userData = {
+                    clerkId: data.id,
+                    email: data.email_addresses[0].email_address,
+                    firstName: data.first_name,
+                    lastName: data.last_name,
+                    photo: data.image_url
+                }
+                console.log("SAVING USER:", userData)
+                await userModel.create(userData)
+                console.log("USER SAVED!")
+                res.json({ success: true })
+                break;
+            }
             case "user.updated": {
                 const userData = {
                     email: data.email_addresses[0].email_address,
@@ -68,7 +60,7 @@ const clerkWebhooks = async (req, res) => {
         }
 
     } catch (error) {
-        console.log(error.message)
+        console.log("WEBHOOK ERROR:", error.message)
         res.json({ success: false, message: error.message })
     }
 }
