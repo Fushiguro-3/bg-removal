@@ -11,33 +11,28 @@ export const config = {
 }
 
 
-// API Controller functiom to manage clerk user with database
-// http://localhost:4000/api/user/webhooks
-
 const clerkWebhooks = async (req, res) => {
     console.log("WEBHOOK HIT");
     
     try{
-
-        //create a svix instance with clerk webhook secret
         const rawBody = await buffer(req)
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
     
-    
-        await whook.verify(JSON.stringify(req.body),{
+        // ✅ Fix 1: rawBody instead of JSON.stringify(req.body)
+        await whook.verify(rawBody, {
             "svix-id": req.headers["svix-id"],
             "svix-timestamp": req.headers["svix-timestamp"],
-            "svix-signature":req.headers["svix-signature"]
+            "svix-signature": req.headers["svix-signature"]
         })
 
+        // ✅ Fix 2: use body instead of req.body
         const body = JSON.parse(rawBody.toString())
-        const {data, type} = req.body
+        const {data, type} = body
 
         console.log("TYPE:", type);
 
         switch (type) {
             case "user.created":{
-                
                 const userData = {
                     clerkId: data.id,
                     email: data.email_addresses[0].email_address,
@@ -45,44 +40,38 @@ const clerkWebhooks = async (req, res) => {
                     lastName: data.last_name,
                     photo: data.image_url
                 }
-              
                 await userModel.create(userData)
-                res.json({})
-
-                console.log("TYPE:", type);
-
+                res.json({ success: true })
                 break;
             }
             
             case "user.updated":{
-
                 const userData = {
                     email: data.email_addresses[0].email_address,
                     firstName: data.first_name,
                     lastName: data.last_name,
                     photo: data.image_url
                 }
-
-                await userModel.findOneAndUpdate({clerkId: data.id},userData)
-                res.json({})
-                
+                await userModel.findOneAndUpdate({clerkId: data.id}, userData)
+                res.json({ success: true })
                 break;
             }
 
             case "user.deleted":{
-
-                await userModel.findOneAndDelete({clerkId:data.id})
-                res.json({})  
-                
+                await userModel.findOneAndDelete({clerkId: data.id})
+                res.json({ success: true })
                 break;
             }
+
+            // ✅ Fix 3: always send a response on default
             default:
+                res.json({ success: true })
                 break;
         }
     
     } catch (error){
         console.log(error.message)
-        res.json({success:false,message:error.message})
+        res.json({success: false, message: error.message})
     }
 }
 
