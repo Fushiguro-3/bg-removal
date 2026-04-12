@@ -2,37 +2,30 @@ import { Webhook } from "svix"
 import userModel from "../models/userModel.js"
 import razorpay from 'razorpay'
 import transactionModel from "../models/transactionModel.js"
-import { buffer } from "micro"
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
 
 
 const clerkWebhooks = async (req, res) => {
     console.log("WEBHOOK HIT");
     
-    try{
-        const rawBody = await buffer(req)
+    try {
         const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
-    
-        // ✅ Fix 1: rawBody instead of JSON.stringify(req.body)
-        await whook.verify(rawBody, {
+
+        // ✅ Vercel-compatible way - req.body is already available
+        const payload = JSON.stringify(req.body)
+
+        await whook.verify(payload, {
             "svix-id": req.headers["svix-id"],
             "svix-timestamp": req.headers["svix-timestamp"],
             "svix-signature": req.headers["svix-signature"]
         })
 
-        // ✅ Fix 2: use body instead of req.body
-        const body = JSON.parse(rawBody.toString())
-        const {data, type} = body
+        const { data, type } = req.body
 
         console.log("TYPE:", type);
 
         switch (type) {
-            case "user.created":{
+            case "user.created": {
                 const userData = {
                     clerkId: data.id,
                     email: data.email_addresses[0].email_address,
@@ -44,34 +37,30 @@ const clerkWebhooks = async (req, res) => {
                 res.json({ success: true })
                 break;
             }
-            
-            case "user.updated":{
+            case "user.updated": {
                 const userData = {
                     email: data.email_addresses[0].email_address,
                     firstName: data.first_name,
                     lastName: data.last_name,
                     photo: data.image_url
                 }
-                await userModel.findOneAndUpdate({clerkId: data.id}, userData)
+                await userModel.findOneAndUpdate({ clerkId: data.id }, userData)
                 res.json({ success: true })
                 break;
             }
-
-            case "user.deleted":{
-                await userModel.findOneAndDelete({clerkId: data.id})
+            case "user.deleted": {
+                await userModel.findOneAndDelete({ clerkId: data.id })
                 res.json({ success: true })
                 break;
             }
-
-            // ✅ Fix 3: always send a response on default
             default:
                 res.json({ success: true })
                 break;
         }
-    
-    } catch (error){
+
+    } catch (error) {
         console.log(error.message)
-        res.json({success: false, message: error.message})
+        res.json({ success: false, message: error.message })
     }
 }
 
