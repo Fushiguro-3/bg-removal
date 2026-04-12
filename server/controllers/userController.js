@@ -2,6 +2,14 @@ import { Webhook } from "svix"
 import userModel from "../models/userModel.js"
 import razorpay from 'razorpay'
 import transactionModel from "../models/transactionModel.js"
+import { buffer } from "micro"
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}
+
 
 // API Controller functiom to manage clerk user with database
 // http://localhost:4000/api/user/webhooks
@@ -12,15 +20,17 @@ const clerkWebhooks = async (req, res) => {
     try{
 
         //create a svix instance with clerk webhook secret
-        // const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
+        const rawBody = await buffer(req)
+        const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
     
     
-        // await whook.verify(JSON.stringify(req.body),{
-        //     "svix-id": req.headers["svix-id"],
-        //     "svix-timestamp": req.headers["svix-timestamp"],
-        //     "svix-signature":req.headers["svix-signature"]
-        // })
+        await whook.verify(JSON.stringify(req.body),{
+            "svix-id": req.headers["svix-id"],
+            "svix-timestamp": req.headers["svix-timestamp"],
+            "svix-signature":req.headers["svix-signature"]
+        })
 
+        const body = JSON.parse(rawBody.toString())
         const {data, type} = req.body
 
         console.log("TYPE:", type);
