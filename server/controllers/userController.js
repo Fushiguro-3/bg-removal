@@ -26,17 +26,26 @@ const clerkWebhooks = async (req, res) => {
 
         switch (type) {
             case "user.created": {
-                const userData = {
-                    clerkId: data.id,
-                    email: data.email_addresses[0].email_address,
-                    firstName: data.first_name,
-                    lastName: data.last_name,
-                    photo: data.image_url
-                }
-                await userModel.create(userData)
-                res.json({ success: true })
-                break;
-            }
+    console.log("USER CREATED HIT")  // ✅ add
+    console.log("DATA:", data)        // ✅ add
+    
+    const userData = {
+        clerkId: data.id,
+        email: data.email_addresses[0].email_address,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        photo: data.image_url
+    }
+    
+    console.log("USERDATA:", userData)  // ✅ add
+    
+    const result = await userModel.create(userData)
+    
+    console.log("SAVED:", result)  // ✅ add
+    
+    res.json({ success: true })
+    break;
+}
             case "user.updated": {
                 const userData = {
                     email: data.email_addresses[0].email_address,
