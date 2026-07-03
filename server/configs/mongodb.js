@@ -1,5 +1,3 @@
-import mongoose from "mongoose";
-
 // configs/mongodb.js
 import mongoose from "mongoose";
 
