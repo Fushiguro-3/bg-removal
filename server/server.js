@@ -5,9 +5,12 @@ import cors from 'cors'
 import connectDB from './configs/mongodb.js'
 import userRouter from './routes/userRoutes.js'
 import imageRouter from './routes/imageRoutes.js'
+import { clerkMiddleware } from '@clerk/express'
 
 // server.js
 const app = express()
+
+app.use(clerkMiddleware())
 app.use(cors())
 
 // ensure DB is connected before any route runs

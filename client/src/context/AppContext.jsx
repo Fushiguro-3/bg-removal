@@ -1,4 +1,4 @@
-import { SignIn, useAuth, useClerk, useUser } from "@clerk/clerk-react";
+import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import { createContext, useState } from "react";
 import axios from 'axios';
 import {toast} from 'react-toastify';
@@ -24,7 +24,12 @@ const AppContextProvider = (props) => {
         try {
 
             const token = await getToken()
-            const { data } = await axios.get(backendUrl+ '/api/user/credits', {headers:{token}})
+            const { data } = await axios.get(backendUrl+ '/api/user/credits',
+                {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+                })
             console.log("RESPONSE:", data);
                 if(data.success){
                     setCredit(data.credits)
@@ -43,7 +48,7 @@ const AppContextProvider = (props) => {
     const removeBg = async (image) => {
 
         try {
-            if(!SignIn){
+            if (!isSignedIn) {
                 return openSignIn()
             }
             setImage(image)
@@ -56,7 +61,11 @@ const AppContextProvider = (props) => {
             const formData = new FormData()
             image && formData.append('image', image)
 
-            const {data} = await axios.post(backendUrl+ '/api/image/remove-bg', formData, {headers:{token}})
+            const {data} = await axios.post(backendUrl+ '/api/image/remove-bg', formData, {
+                headers: {
+                 Authorization: `Bearer ${token}`
+                }
+})
 
             if(data.success){
                 setResultImage(data.resultImage)

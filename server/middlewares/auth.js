@@ -1,24 +1,17 @@
-import jwt from 'jsonwebtoken'
+import { getAuth } from '@clerk/express'
 
-//middleware function to decode jwt token to get clerkId
+const authUser = (req, res, next) => {
+    const { isAuthenticated, userId } = getAuth(req)
 
-const authUser = async (req, res, next) => {
-    try {
-        const {token} = req.headers
-
-        if(!token){
-            return res.json({success: false, message:"Not authorized login again"})
-        }
-
-        const token_decode = jwt.decode(token)
-        req.clerkId = token_decode.sub
-        next()
-
-        
-    } catch (error) {
-        console.log(error.message)
-        res.json({success:false, message:error.message})
+    if (!isAuthenticated || !userId) {
+        return res.status(401).json({
+            success: false,
+            message: 'Not authorized. Please log in again.'
+        })
     }
+
+    req.clerkId = userId
+    next()
 }
 
-export default authUser;
+export default authUser
